@@ -371,7 +371,7 @@
     .scroll-text {
       position: absolute;
       white-space: nowrap;
-      font-size: 15vw;
+      font-size: 35vw;
       font-weight: bold;
       color: #00ff88;
       text-shadow: 0 0 20px rgba(0, 255, 136, 0.8), 0 0 40px rgba(0, 255, 136, 0.4);
@@ -432,6 +432,68 @@
 
     .exit-btn.visible {
       opacity: 1;
+    }
+
+    .fullscreen-speed {
+      position: fixed;
+      bottom: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 14px 20px;
+      border-radius: 12px;
+      z-index: 10001;
+      opacity: 0;
+      transition: opacity 0.5s;
+      pointer-events: none;
+    }
+
+    .fullscreen-speed.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .fs-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .fullscreen-speed label {
+      color: rgba(255,255,255,0.7);
+      font-size: 0.85rem;
+      min-width: 55px;
+    }
+
+    .fullscreen-speed input[type="range"] {
+      width: 130px;
+      accent-color: #00ff88;
+      height: 6px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: rgba(255,255,255,0.2);
+      border-radius: 3px;
+    }
+
+    .fullscreen-speed input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #fff;
+      cursor: pointer;
+    }
+
+    .fullscreen-speed span {
+      color: rgba(255,255,255,0.7);
+      font-size: 0.85rem;
+      min-width: 36px;
     }
 
     /* Emoji picker */
@@ -748,7 +810,7 @@
 </head>
 <body>
   <div class="input-container">
-    <h1>Light Box</h1>
+    <h1>Light Box <span style="font-size:0.5em; color:#999; font-weight:normal;">by NP</span></h1>
 
     <!-- Preview -->
     <div class="preview-container" id="previewContainer">
@@ -774,9 +836,9 @@
         <button class="contestant-btn" data-text="V3 มิวสิค"><span class="v-badge">V3</span>มิวสิค</button>
         <button class="contestant-btn" data-text="V4 แป้ง"><span class="v-badge">V4</span>แป้ง</button>
         <button class="contestant-btn" data-text="V5 ยูริ"><span class="v-badge">V5</span>ยูริ</button>
-        <button class="contestant-btn" data-text="V6 ปิม"><span class="v-badge">V6</span>ปิม</button>
+        <button class="contestant-btn" data-text="V6 บีม"><span class="v-badge">V6</span>บีม</button>
         <button class="contestant-btn" data-text="V7 โฟกัส"><span class="v-badge">V7</span>โฟกัส</button>
-        <button class="contestant-btn" data-text="V8 ชาน"><span class="v-badge">V8</span>ชาน</button>
+        <button class="contestant-btn" data-text="V8 ซาน"><span class="v-badge">V8</span>ซาน</button>
         <button class="contestant-btn" data-text="V9 กิ่งแก้ม"><span class="v-badge">V9</span>กิ่งแก้ม</button>
         <button class="contestant-btn" data-text="V10 โอม"><span class="v-badge">V10</span>โอม</button>
         <button class="contestant-btn" data-text="V11 นะโม"><span class="v-badge">V11</span>นะโม</button>
@@ -825,18 +887,6 @@
       </div>
     </div>
 
-    <!-- Sliders -->
-    <div class="slider-control">
-      <label for="speed">ความเร็ว:</label>
-      <input type="range" id="speed" min="3" max="30" value="10">
-      <span id="speedValue">10s</span>
-    </div>
-    <div class="slider-control">
-      <label for="fontSize">ขนาดตัวอักษร:</label>
-      <input type="range" id="fontSize" min="5" max="80" value="15">
-      <span id="fontSizeValue">15vw</span>
-    </div>
-
     <!-- Start buttons -->
     <div class="controls">
       <button class="btn-fullscreen" id="btnFullscreen">เต็มจอ & วิ่ง</button>
@@ -852,6 +902,18 @@
 
   <div class="scroll-display" id="scrollDisplay">
     <div class="scroll-text" id="scrollText"></div>
+    <div class="fullscreen-speed" id="fullscreenSpeed">
+      <div class="fs-row">
+        <label>ความเร็ว</label>
+        <input type="range" id="speed" min="3" max="30" value="10">
+        <span id="speedValue">10s</span>
+      </div>
+      <div class="fs-row">
+        <label>ขนาด</label>
+        <input type="range" id="fontSize" min="5" max="80" value="35">
+        <span id="fontSizeValue">35vw</span>
+      </div>
+    </div>
     <div class="exit-btn" id="exitBtn">Edit</div>
     <div class="exit-hint" id="exitHint">แตะเพื่อออก</div>
   </div>
@@ -868,6 +930,7 @@
     const fontSizeValue = document.getElementById('fontSizeValue');
     const exitHint = document.getElementById('exitHint');
     const exitBtn = document.getElementById('exitBtn');
+    const fullscreenSpeed = document.getElementById('fullscreenSpeed');
     const previewText = document.getElementById('previewText');
     const previewPlaceholder = document.getElementById('previewPlaceholder');
     const colorPresets = document.getElementById('colorPresets');
@@ -911,12 +974,18 @@
     const emojiPanel = document.getElementById('emojiPanel');
     const emojiGrid = document.getElementById('emojiGrid');
     const emojis = [
-      '😀','😍','🥰','😎','🔥','⭐','✨','💖',
-      '❤️','🧡','💛','💚','💙','💜','🤍','🖤',
-      '👏','🙌','💪','🎉','🎊','🏆','🥇','🥈',
-      '🥉','👑','💎','🌟','🌈','🦋','🌸','🌺',
-      '🎵','🎶','🎤','🎸','🎹','🎬','📣','🔔',
-      '💯','❗','❓','⚡','🫶','🤩','😢','😭'
+      '\u{1F451}','\u{1F52B}','\u{1F600}','\u{1F60D}','\u{1F970}','\u{1F60E}','\u{1F525}','\u2B50',
+      '\u2728','\u{1F496}','\u2764\uFE0F','\u{1F9E1}','\u{1F49B}','\u{1F49A}','\u{1F499}','\u{1F49C}',
+      '\u{1F90D}','\u{1F5A4}','\u{1F44F}','\u{1F64C}','\u{1F4AA}','\u{1F389}','\u{1F38A}','\u{1F3C6}',
+      '\u{1F947}','\u{1F948}','\u{1F949}','\u{1F48E}','\u{1F31F}','\u{1F308}','\u{1F98B}','\u{1F338}',
+      '\u{1F33A}','\u{1F3B5}','\u{1F3B6}','\u{1F3A4}','\u{1F3B8}','\u{1F3B9}','\u{1F3AC}','\u{1F4E3}',
+      '\u{1F514}','\u{1F4AF}','\u2757','\u2753','\u26A1','\u{1FAF6}','\u{1F929}','\u{1F622}',
+      '\u{1F62D}','\u{1F979}','\u{1F624}','\u{1F480}','\u{1F92F}','\u{1F973}','\u{1F607}','\u{1F917}',
+      '\u{1FAE1}','\u{1F91F}','\u270C\uFE0F','\u{1F918}','\u{1F446}','\u{1F447}','\u{1F449}','\u{1F448}',
+      '\u{1F64F}','\u{1F485}','\u{1FAF0}','\u2764\uFE0F\u200D\u{1F525}','\u{1F49D}','\u{1F497}','\u{1F493}','\u{1F49E}',
+      '\u{1F3AF}','\u{1F680}','\u{1F4AB}','\u{1FA69}','\u{1F3AA}','\u{1F3AD}','\u{1F3A8}','\u{1F5BC}\uFE0F',
+      '\u{1F4F8}','\u{1FA84}','\u{1F9FF}','\u{1F340}','\u{1F33B}','\u{1F339}','\u{1F940}','\u{1F52E}',
+      '\u{1FABD}','\u{1F54A}\uFE0F','\u{1F409}','\u{1F984}','\u{1F431}','\u{1F436}','\u{1F981}','\u{1F42F}'
     ];
 
     // Render emojis
@@ -1063,6 +1132,7 @@
       scrollDisplay.classList.remove('active');
       scrollText.classList.remove('static');
       exitBtn.classList.remove('visible');
+      fullscreenSpeed.classList.remove('visible');
       if (document.fullscreenElement || document.webkitFullscreenElement) {
         if (document.exitFullscreen) {
           document.exitFullscreen();
@@ -1088,6 +1158,7 @@
 
     scrollDisplay.addEventListener('touchend', (e) => {
       if (e.target === exitBtn || exitBtn.contains(e.target)) return;
+      if (fullscreenSpeed.contains(e.target)) return;
       e.preventDefault();
       touchHandled = true;
       toggleExitBtn();
@@ -1095,6 +1166,7 @@
 
     scrollDisplay.addEventListener('click', (e) => {
       if (e.target === exitBtn || exitBtn.contains(e.target)) return;
+      if (fullscreenSpeed.contains(e.target)) return;
       // ถ้า touchend จัดการแล้ว ไม่ต้องทำซ้ำ
       if (touchHandled) {
         touchHandled = false;
@@ -1106,8 +1178,10 @@
     function toggleExitBtn() {
       if (exitBtn.classList.contains('visible')) {
         exitBtn.classList.remove('visible');
+        fullscreenSpeed.classList.remove('visible');
       } else {
         exitBtn.classList.add('visible');
+        fullscreenSpeed.classList.add('visible');
       }
     }
 
