@@ -328,7 +328,7 @@
     .preview-text {
       white-space: nowrap;
       font-weight: bold;
-      color: #e94560;
+      color: #00ff88;
       text-shadow: 0 0 10px currentColor;
       animation: previewScroll 5s linear infinite;
       position: absolute;
@@ -373,8 +373,8 @@
       white-space: nowrap;
       font-size: 15vw;
       font-weight: bold;
-      color: #e94560;
-      text-shadow: 0 0 20px rgba(233, 69, 96, 0.8), 0 0 40px rgba(233, 69, 96, 0.4);
+      color: #00ff88;
+      text-shadow: 0 0 20px rgba(0, 255, 136, 0.8), 0 0 40px rgba(0, 255, 136, 0.4);
       animation: scrollText linear infinite;
     }
 
@@ -432,6 +432,77 @@
 
     .exit-btn.visible {
       opacity: 1;
+    }
+
+    /* History section */
+    .history-section {
+      width: 100%;
+      max-width: 500px;
+      margin-top: 5px;
+    }
+
+    .history-title {
+      color: #ccc;
+      font-size: 0.95rem;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .history-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #16213e;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid #333;
+      cursor: pointer;
+      transition: background 0.2s;
+      touch-action: manipulation;
+    }
+
+    .history-item:active {
+      background: #1f2f4d;
+    }
+
+    .history-item-text {
+      flex: 1;
+      color: #ddd;
+      font-size: 0.95rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .history-item-delete {
+      background: none;
+      border: none;
+      color: #e94560;
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 6px;
+      touch-action: manipulation;
+      line-height: 1;
+    }
+
+    .history-item-delete:active {
+      background: rgba(233, 69, 96, 0.2);
+    }
+
+    .history-empty {
+      color: #555;
+      font-size: 0.85rem;
+      text-align: center;
+      padding: 10px;
     }
 
     /* iPad / Tablet responsive */
@@ -571,9 +642,9 @@
     <div class="color-section">
       <label>สีตัวอักษร:</label>
       <div class="color-presets" id="colorPresets">
-        <button class="color-btn active" data-color="#e94560" style="background:#e94560;" title="แดง"></button>
+        <button class="color-btn" data-color="#e94560" style="background:#e94560;" title="แดง"></button>
         <button class="color-btn" data-color="#00d4ff" style="background:#00d4ff;" title="ฟ้า"></button>
-        <button class="color-btn" data-color="#00ff88" style="background:#00ff88;" title="เขียว"></button>
+        <button class="color-btn active" data-color="#00ff88" style="background:#00ff88;" title="เขียว"></button>
         <button class="color-btn" data-color="#ffdd00" style="background:#ffdd00;" title="เหลือง"></button>
         <button class="color-btn" data-color="#ff6600" style="background:#ff6600;" title="ส้ม"></button>
         <button class="color-btn" data-color="#cc44ff" style="background:#cc44ff;" title="ม่วง"></button>
@@ -582,7 +653,7 @@
       </div>
       <div class="custom-color-row">
         <label>เลือกสีเอง:</label>
-        <input type="color" id="customColor" value="#e94560">
+        <input type="color" id="customColor" value="#00ff88">
       </div>
 
       <!-- HSL Sliders -->
@@ -625,11 +696,17 @@
       <button class="btn-fullscreen" id="btnFullscreen">เต็มจอ & วิ่ง</button>
       <button class="btn-static" id="btnFullscreenStatic">เต็มจอ (นิ่ง)</button>
     </div>
+
+    <!-- History -->
+    <div class="history-section" id="historySection">
+      <div class="history-title">ประวัติข้อความ</div>
+      <div class="history-list" id="historyList"></div>
+    </div>
   </div>
 
   <div class="scroll-display" id="scrollDisplay">
     <div class="scroll-text" id="scrollText"></div>
-    <div class="exit-btn" id="exitBtn">กลับแก้ไข</div>
+    <div class="exit-btn" id="exitBtn">Edit</div>
     <div class="exit-hint" id="exitHint">แตะเพื่อออก</div>
   </div>
 
@@ -658,7 +735,7 @@
     const hslSwatch = document.getElementById('hslSwatch');
     const btnApplyHSL = document.getElementById('btnApplyHSL');
 
-    let currentColor = '#e94560';
+    let currentColor = '#00ff88';
 
     // Update preview on text input
     textInput.addEventListener('input', updatePreview);
@@ -783,10 +860,11 @@
 
       scrollDisplay.classList.add('active');
 
-      // Request fullscreen (iPad Safari uses webkitRequestFullscreen)
+      // Request fullscreen (ถ้ารองรับ)
+      // บน iPad Safari ไม่รองรับ Fullscreen API จะใช้ overlay เต็มจอแทน
       const elem = document.documentElement;
       if (elem.requestFullscreen) {
-        elem.requestFullscreen();
+        elem.requestFullscreen().catch(() => {});
       } else if (elem.webkitRequestFullscreen) {
         elem.webkitRequestFullscreen();
       }
@@ -825,10 +903,22 @@
     });
 
     // แตะจอ: ถ้าปุ่มยังไม่โชว์ → โชว์ปุ่ม, ถ้าปุ่มโชว์อยู่ → ซ่อนปุ่ม
-    scrollDisplay.addEventListener('click', toggleExitBtn);
+    let touchHandled = false;
+
     scrollDisplay.addEventListener('touchend', (e) => {
-      if (e.target === exitBtn) return;
+      if (e.target === exitBtn || exitBtn.contains(e.target)) return;
       e.preventDefault();
+      touchHandled = true;
+      toggleExitBtn();
+    });
+
+    scrollDisplay.addEventListener('click', (e) => {
+      if (e.target === exitBtn || exitBtn.contains(e.target)) return;
+      // ถ้า touchend จัดการแล้ว ไม่ต้องทำซ้ำ
+      if (touchHandled) {
+        touchHandled = false;
+        return;
+      }
       toggleExitBtn();
     });
 
@@ -845,13 +935,99 @@
       if (e.key === 'Escape') stopScrolling();
     });
 
-    // Handle fullscreen change
+    // Handle fullscreen change — ไม่ออกอัตโนมัติ แค่รองรับกรณี browser ปิด fullscreen เอง
     document.addEventListener('fullscreenchange', () => {
-      if (!document.fullscreenElement) scrollDisplay.classList.remove('active');
+      // ไม่ทำอะไร ให้ user กดปุ่มออกเอง
     });
     document.addEventListener('webkitfullscreenchange', () => {
-      if (!document.webkitFullscreenElement) scrollDisplay.classList.remove('active');
+      // ไม่ทำอะไร ให้ user กดปุ่มออกเอง
     });
+
+    // === History ===
+    const historyList = document.getElementById('historyList');
+    const HISTORY_KEY = 'lightbox_history';
+
+    function getHistory() {
+      try {
+        return JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveHistory(list) {
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(list));
+    }
+
+    function addToHistory(text) {
+      let list = getHistory();
+      // ไม่เก็บซ้ำ
+      list = list.filter(item => item !== text);
+      // เพิ่มไว้บนสุด
+      list.unshift(text);
+      // เก็บแค่ 20 อัน
+      if (list.length > 20) list = list.slice(0, 20);
+      saveHistory(list);
+      renderHistory();
+    }
+
+    function deleteFromHistory(text) {
+      let list = getHistory();
+      list = list.filter(item => item !== text);
+      saveHistory(list);
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const list = getHistory();
+      if (list.length === 0) {
+        historyList.innerHTML = '<div class="history-empty">ยังไม่มีประวัติ</div>';
+        return;
+      }
+      historyList.innerHTML = list.map(item => `
+        <div class="history-item">
+          <div class="history-item-text">${escapeHtml(item)}</div>
+          <button class="history-item-delete" data-text="${escapeAttr(item)}" title="ลบ">&times;</button>
+        </div>
+      `).join('');
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function escapeAttr(str) {
+      return str.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    // กดเลือก history item → ใส่ข้อความกลับ
+    historyList.addEventListener('click', (e) => {
+      const deleteBtn = e.target.closest('.history-item-delete');
+      if (deleteBtn) {
+        e.stopPropagation();
+        deleteFromHistory(deleteBtn.dataset.text);
+        return;
+      }
+      const item = e.target.closest('.history-item');
+      if (item) {
+        const text = item.querySelector('.history-item-text').textContent;
+        textInput.value = text;
+        updatePreview();
+      }
+    });
+
+    // บันทึก history ตอนกดเต็มจอ — แทรกใน startFullscreen
+    const originalStartFullscreen = startFullscreen;
+    startFullscreen = function(isStatic) {
+      const text = textInput.value.trim();
+      if (text) {
+        addToHistory(text);
+      }
+      originalStartFullscreen(isStatic);
+    };
+
+    // โหลด history ตอนเปิดหน้า
+    renderHistory();
   </script>
 </body>
 </html>
