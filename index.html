@@ -17,6 +17,7 @@
 
     html, body {
       overflow-x: hidden;
+      overflow-y: auto;
     }
 
     body {
@@ -352,14 +353,12 @@
     .scroll-display {
       display: none;
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      width: 100vw;
-      height: 100vh;
-      height: 100dvh;
-      height: -webkit-fill-available;
+      top: -50px;
+      left: -50px;
+      right: -50px;
+      bottom: -50px;
+      width: calc(100vw + 100px);
+      height: calc(100vh + 100px);
       background: #000;
       overflow: hidden;
       cursor: pointer;
@@ -1118,8 +1117,9 @@
 
       scrollDisplay.classList.add('active');
 
-      // Force true fullscreen height on iPad Safari
-      scrollDisplay.style.height = window.innerHeight + 'px';
+      // Force true fullscreen on iPad Safari / standalone
+      scrollDisplay.style.height = (window.innerHeight + 100) + 'px';
+      scrollDisplay.style.width = (window.innerWidth + 100) + 'px';
       window.scrollTo(0, 0);
 
       // Request fullscreen (ถ้ารองรับ)
@@ -1213,7 +1213,8 @@
     // Keep fullscreen height correct on resize/orientation change
     window.addEventListener('resize', () => {
       if (scrollDisplay.classList.contains('active')) {
-        scrollDisplay.style.height = window.innerHeight + 'px';
+        scrollDisplay.style.height = (window.innerHeight + 100) + 'px';
+        scrollDisplay.style.width = (window.innerWidth + 100) + 'px';
       }
     });
 
