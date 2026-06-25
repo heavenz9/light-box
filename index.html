@@ -434,6 +434,106 @@
       opacity: 1;
     }
 
+    /* Emoji picker */
+    .emoji-section {
+      width: 100%;
+      max-width: 500px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .emoji-toggle {
+      padding: 8px 16px;
+      font-size: 0.95rem;
+      background: #16213e;
+      color: #ccc;
+      border: 1px solid #333;
+      border-radius: 8px;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .emoji-toggle:active {
+      background: #1f3a5f;
+    }
+
+    .emoji-panel {
+      width: 100%;
+      background: #16213e;
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 12px;
+      margin-top: 8px;
+      max-height: 180px;
+      overflow-y: auto;
+    }
+
+    .emoji-grid {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 6px;
+    }
+
+    .emoji-item {
+      font-size: 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 6px;
+      transition: background 0.15s;
+      touch-action: manipulation;
+      line-height: 1;
+    }
+
+    .emoji-item:active {
+      background: rgba(255,255,255,0.1);
+    }
+
+    /* Contestants quick select */
+    .contestants-section {
+      width: 100%;
+      max-width: 500px;
+    }
+
+    .contestants-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .contestant-btn {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 10px 8px;
+      font-size: 0.85rem;
+      background: #16213e;
+      color: #ddd;
+      border: 1px solid #333;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      touch-action: manipulation;
+      transition: background 0.2s, border-color 0.2s;
+      justify-content: center;
+    }
+
+    .contestant-btn:active {
+      background: #1f3a5f;
+      border-color: #00ff88;
+    }
+
+    .v-badge {
+      background: #e94560;
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: bold;
+      padding: 2px 5px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
     /* History section */
     .history-section {
       width: 100%;
@@ -582,6 +682,16 @@
         height: 44px;
       }
 
+      .contestants-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+      }
+
+      .contestant-btn {
+        padding: 12px 10px;
+        font-size: 0.95rem;
+      }
+
       .exit-hint {
         font-size: 1.1rem;
         bottom: 40px;
@@ -623,6 +733,16 @@
         min-width: 65px;
         font-size: 0.78rem;
       }
+
+      .contestants-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+      }
+
+      .contestant-btn {
+        padding: 8px 6px;
+        font-size: 0.75rem;
+      }
     }
   </style>
 </head>
@@ -637,6 +757,32 @@
     </div>
 
     <input type="text" id="textInput" placeholder="พิมพ์ข้อความที่นี่..." autofocus>
+
+    <!-- Emoji picker -->
+    <div class="emoji-section">
+      <button class="emoji-toggle" id="emojiToggle">😀 Emoji</button>
+      <div class="emoji-panel" id="emojiPanel" style="display:none;">
+        <div class="emoji-grid" id="emojiGrid"></div>
+      </div>
+    </div>
+
+    <!-- Quick select contestants -->
+    <div class="contestants-section">
+      <div class="contestants-grid">
+        <button class="contestant-btn" data-text="V1 เจเจ"><span class="v-badge">V1</span>เจเจ</button>
+        <button class="contestant-btn" data-text="V2 โฟน"><span class="v-badge">V2</span>โฟน</button>
+        <button class="contestant-btn" data-text="V3 มิวสิค"><span class="v-badge">V3</span>มิวสิค</button>
+        <button class="contestant-btn" data-text="V4 แป้ง"><span class="v-badge">V4</span>แป้ง</button>
+        <button class="contestant-btn" data-text="V5 ยูริ"><span class="v-badge">V5</span>ยูริ</button>
+        <button class="contestant-btn" data-text="V6 ปิม"><span class="v-badge">V6</span>ปิม</button>
+        <button class="contestant-btn" data-text="V7 โฟกัส"><span class="v-badge">V7</span>โฟกัส</button>
+        <button class="contestant-btn" data-text="V8 ชาน"><span class="v-badge">V8</span>ชาน</button>
+        <button class="contestant-btn" data-text="V9 กิ่งแก้ม"><span class="v-badge">V9</span>กิ่งแก้ม</button>
+        <button class="contestant-btn" data-text="V10 โอม"><span class="v-badge">V10</span>โอม</button>
+        <button class="contestant-btn" data-text="V11 นะโม"><span class="v-badge">V11</span>นะโม</button>
+        <button class="contestant-btn" data-text="V12 แจ็คกี้"><span class="v-badge">V12</span>แจ็คกี้</button>
+      </div>
+    </div>
 
     <!-- Color picker -->
     <div class="color-section">
@@ -687,7 +833,7 @@
     </div>
     <div class="slider-control">
       <label for="fontSize">ขนาดตัวอักษร:</label>
-      <input type="range" id="fontSize" min="5" max="40" value="15">
+      <input type="range" id="fontSize" min="5" max="80" value="15">
       <span id="fontSizeValue">15vw</span>
     </div>
 
@@ -751,6 +897,41 @@
         previewPlaceholder.style.display = 'block';
       }
     }
+
+    // Contestant quick select
+    document.querySelector('.contestants-grid').addEventListener('click', (e) => {
+      const btn = e.target.closest('.contestant-btn');
+      if (!btn) return;
+      textInput.value = btn.dataset.text;
+      updatePreview();
+    });
+
+    // Emoji picker
+    const emojiToggle = document.getElementById('emojiToggle');
+    const emojiPanel = document.getElementById('emojiPanel');
+    const emojiGrid = document.getElementById('emojiGrid');
+    const emojis = [
+      '😀','😍','🥰','😎','🔥','⭐','✨','💖',
+      '❤️','🧡','💛','💚','💙','💜','🤍','🖤',
+      '👏','🙌','💪','🎉','🎊','🏆','🥇','🥈',
+      '🥉','👑','💎','🌟','🌈','🦋','🌸','🌺',
+      '🎵','🎶','🎤','🎸','🎹','🎬','📣','🔔',
+      '💯','❗','❓','⚡','🫶','🤩','😢','😭'
+    ];
+
+    // Render emojis
+    emojiGrid.innerHTML = emojis.map(e => `<div class="emoji-item">${e}</div>`).join('');
+
+    emojiToggle.addEventListener('click', () => {
+      emojiPanel.style.display = emojiPanel.style.display === 'none' ? 'block' : 'none';
+    });
+
+    emojiGrid.addEventListener('click', (e) => {
+      const item = e.target.closest('.emoji-item');
+      if (!item) return;
+      textInput.value += item.textContent;
+      updatePreview();
+    });
 
     // Color presets
     colorPresets.addEventListener('click', (e) => {
