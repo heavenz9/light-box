@@ -791,12 +791,11 @@
         elem.webkitRequestFullscreen();
       }
 
-      // Hide hint after 3 seconds, show exit button
+      // Hide hint after 3 seconds
       exitHint.style.opacity = '1';
       exitBtn.classList.remove('visible');
       setTimeout(() => {
         exitHint.style.opacity = '0';
-        exitBtn.classList.add('visible');
       }, 3000);
     }
 
@@ -814,7 +813,7 @@
       }
     }
 
-    // Exit button
+    // Exit button — กดปุ่มนี้ถึงจะออก
     exitBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       stopScrolling();
@@ -825,12 +824,21 @@
       stopScrolling();
     });
 
-    // Touch/click to exit
-    scrollDisplay.addEventListener('click', stopScrolling);
+    // แตะจอ: ถ้าปุ่มยังไม่โชว์ → โชว์ปุ่ม, ถ้าปุ่มโชว์อยู่ → ซ่อนปุ่ม
+    scrollDisplay.addEventListener('click', toggleExitBtn);
     scrollDisplay.addEventListener('touchend', (e) => {
+      if (e.target === exitBtn) return;
       e.preventDefault();
-      stopScrolling();
+      toggleExitBtn();
     });
+
+    function toggleExitBtn() {
+      if (exitBtn.classList.contains('visible')) {
+        exitBtn.classList.remove('visible');
+      } else {
+        exitBtn.classList.add('visible');
+      }
+    }
 
     // ESC to exit
     document.addEventListener('keydown', (e) => {
