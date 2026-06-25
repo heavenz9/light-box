@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>Light Box</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      overflow-x: hidden;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #1a1a2e;
+      color: #fff;
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    }
+
+    .input-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+      padding: 30px 20px;
+      max-width: 700px;
+      width: 100%;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      margin-bottom: 5px;
+      color: #e94560;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      max-width: 500px;
+      padding: 16px 20px;
+      font-size: 1.3rem;
+      border: 2px solid #e94560;
+      border-radius: 12px;
+      background: #16213e;
+      color: #fff;
+      outline: none;
+      transition: border-color 0.3s;
+      -webkit-appearance: none;
+    }
+
+    input[type="text"]:focus {
+      border-color: #0f3460;
+      box-shadow: 0 0 10px rgba(233, 69, 96, 0.5);
+    }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      width: 100%;
+    }
+
+    button {
+      padding: 14px 28px;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: transform 0.2s, background 0.3s;
+      font-weight: bold;
+      touch-action: manipulation;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    .btn-fullscreen {
+      background: #e94560;
+      color: #fff;
+      flex: 1;
+      min-width: 160px;
+    }
+
+    .btn-static {
+      background: #533483;
+      color: #fff;
+      flex: 1;
+      min-width: 160px;
+    }
+
+    .slider-control {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #ccc;
+      width: 100%;
+      max-width: 500px;
+    }
+
+    .slider-control label {
+      min-width: 100px;
+      text-align: right;
+      font-size: 0.95rem;
+    }
+
+    .slider-control input[type="range"] {
+      flex: 1;
+      height: 6px;
+      accent-color: #e94560;
+      -webkit-appearance: none;
+      appearance: none;
+      background: #333;
+      border-radius: 3px;
+    }
+
+    .slider-control input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #e94560;
+      border: 2px solid #fff;
+      cursor: pointer;
+    }
+
+    .slider-control span {
+      min-width: 50px;
+      font-size: 0.9rem;
+    }
+
+    /* Color picker section */
+    .color-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
+      max-width: 500px;
+    }
+
+    .color-section > label {
+      color: #ccc;
+      font-size: 1rem;
+    }
+
+    .color-presets {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .color-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 3px solid transparent;
+      cursor: pointer;
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+      padding: 0;
+      touch-action: manipulation;
+    }
+
+    .color-btn:active {
+      transform: scale(1.15);
+    }
+
+    .color-btn.active {
+      border-color: #fff;
+      box-shadow: 0 0 12px rgba(255, 255, 255, 0.6);
+    }
+
+    .custom-color-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .custom-color-row label {
+      color: #999;
+      font-size: 0.9rem;
+    }
+
+    input[type="color"] {
+      width: 44px;
+      height: 44px;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      background: none;
+      padding: 0;
+    }
+
+    input[type="color"]::-webkit-color-swatch-wrapper {
+      padding: 2px;
+    }
+
+    input[type="color"]::-webkit-color-swatch {
+      border-radius: 50%;
+      border: 2px solid #555;
+    }
+
+    /* HSL Sliders */
+    .hsl-section {
+      width: 100%;
+      max-width: 500px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: #16213e;
+      padding: 18px 20px;
+      border-radius: 12px;
+      border: 1px solid #333;
+    }
+
+    .hsl-section .section-title {
+      color: #ccc;
+      font-size: 0.95rem;
+      text-align: center;
+      margin-bottom: 4px;
+    }
+
+    .hsl-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .hsl-row label {
+      min-width: 80px;
+      color: #aaa;
+      font-size: 0.85rem;
+      text-align: right;
+    }
+
+    .hsl-row input[type="range"] {
+      flex: 1;
+      height: 10px;
+      border-radius: 5px;
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    .hsl-row input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #fff;
+      border: 2px solid #333;
+      cursor: pointer;
+      box-shadow: 0 0 4px rgba(0,0,0,0.4);
+    }
+
+    #hueSlider {
+      background: linear-gradient(to right, 
+        hsl(0,100%,50%), hsl(60,100%,50%), hsl(120,100%,50%), 
+        hsl(180,100%,50%), hsl(240,100%,50%), hsl(300,100%,50%), hsl(360,100%,50%));
+    }
+
+    #satSlider {
+      background: linear-gradient(to right, hsl(0,0%,50%), hsl(0,100%,50%));
+    }
+
+    #lightSlider {
+      background: linear-gradient(to right, hsl(0,100%,0%), hsl(0,100%,50%), hsl(0,100%,100%));
+    }
+
+    .hsl-row span {
+      min-width: 42px;
+      color: #999;
+      font-size: 0.8rem;
+    }
+
+    .hsl-preview-swatch {
+      width: 100%;
+      height: 36px;
+      border-radius: 8px;
+      border: 1px solid #555;
+      margin-top: 4px;
+    }
+
+    .btn-apply-hsl {
+      padding: 10px 20px;
+      background: #e94560;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: bold;
+      touch-action: manipulation;
+    }
+
+    /* Preview section */
+    .preview-container {
+      width: 100%;
+      max-width: 500px;
+      height: 90px;
+      background: #000;
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      border: 1px solid #333;
+    }
+
+    .preview-text {
+      white-space: nowrap;
+      font-weight: bold;
+      color: #e94560;
+      text-shadow: 0 0 10px currentColor;
+      animation: previewScroll 5s linear infinite;
+      position: absolute;
+    }
+
+    .preview-placeholder {
+      color: #555;
+      font-size: 0.95rem;
+    }
+
+    @keyframes previewScroll {
+      from {
+        transform: translateX(260px);
+      }
+      to {
+        transform: translateX(-100%);
+      }
+    }
+
+    /* Fullscreen scrolling display */
+    .scroll-display {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      height: -webkit-fill-available;
+      background: #000;
+      overflow: hidden;
+      cursor: pointer;
+      z-index: 9999;
+    }
+
+    .scroll-display.active {
+      display: flex;
+      align-items: center;
+    }
+
+    .scroll-text {
+      position: absolute;
+      white-space: nowrap;
+      font-size: 15vw;
+      font-weight: bold;
+      color: #e94560;
+      text-shadow: 0 0 20px rgba(233, 69, 96, 0.8), 0 0 40px rgba(233, 69, 96, 0.4);
+      animation: scrollText linear infinite;
+    }
+
+    .scroll-text.static {
+      animation: none;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      white-space: normal;
+      width: 90vw;
+    }
+
+    @keyframes scrollText {
+      from {
+        transform: translateX(100vw);
+      }
+      to {
+        transform: translateX(-100%);
+      }
+    }
+
+    .exit-hint {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 1rem;
+      z-index: 10000;
+      pointer-events: none;
+      transition: opacity 2s;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .exit-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: bold;
+      z-index: 10001;
+      cursor: pointer;
+      touch-action: manipulation;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      opacity: 0;
+      transition: opacity 0.5s;
+    }
+
+    .exit-btn.visible {
+      opacity: 1;
+    }
+
+    /* iPad / Tablet responsive */
+    @media (min-width: 768px) and (max-width: 1194px) {
+      .input-container {
+        gap: 22px;
+        padding: 40px 30px;
+        max-width: 750px;
+      }
+
+      h1 {
+        font-size: 2.5rem;
+      }
+
+      input[type="text"] {
+        font-size: 1.4rem;
+        padding: 18px 24px;
+        max-width: 600px;
+      }
+
+      button {
+        padding: 16px 32px;
+        font-size: 1.2rem;
+      }
+
+      .color-btn {
+        width: 50px;
+        height: 50px;
+      }
+
+      .color-presets {
+        gap: 14px;
+      }
+
+      .preview-container {
+        height: 100px;
+        max-width: 600px;
+      }
+
+      .slider-control {
+        max-width: 600px;
+      }
+
+      .slider-control label {
+        font-size: 1rem;
+      }
+
+      .slider-control input[type="range"] {
+        height: 8px;
+      }
+
+      .slider-control input[type="range"]::-webkit-slider-thumb {
+        width: 28px;
+        height: 28px;
+      }
+
+      .hsl-section {
+        max-width: 600px;
+        padding: 20px 24px;
+      }
+
+      .hsl-row input[type="range"] {
+        height: 12px;
+      }
+
+      .hsl-row input[type="range"]::-webkit-slider-thumb {
+        width: 28px;
+        height: 28px;
+      }
+
+      .hsl-row label {
+        font-size: 0.95rem;
+        min-width: 90px;
+      }
+
+      .hsl-preview-swatch {
+        height: 44px;
+      }
+
+      .exit-hint {
+        font-size: 1.1rem;
+        bottom: 40px;
+      }
+    }
+
+    /* Small phone */
+    @media (max-width: 480px) {
+      .input-container {
+        padding: 20px 15px;
+        gap: 14px;
+      }
+
+      h1 {
+        font-size: 1.6rem;
+      }
+
+      input[type="text"] {
+        font-size: 1rem;
+        padding: 12px 16px;
+      }
+
+      button {
+        padding: 12px 20px;
+        font-size: 1rem;
+      }
+
+      .color-btn {
+        width: 36px;
+        height: 36px;
+      }
+
+      .slider-control label {
+        min-width: 80px;
+        font-size: 0.85rem;
+      }
+
+      .hsl-row label {
+        min-width: 65px;
+        font-size: 0.78rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="input-container">
+    <h1>Light Box</h1>
+
+    <!-- Preview -->
+    <div class="preview-container" id="previewContainer">
+      <span class="preview-placeholder" id="previewPlaceholder">ตัวอย่างข้อความจะแสดงที่นี่</span>
+      <div class="preview-text" id="previewText" style="display:none;"></div>
+    </div>
+
+    <input type="text" id="textInput" placeholder="พิมพ์ข้อความที่นี่..." autofocus>
+
+    <!-- Color picker -->
+    <div class="color-section">
+      <label>สีตัวอักษร:</label>
+      <div class="color-presets" id="colorPresets">
+        <button class="color-btn active" data-color="#e94560" style="background:#e94560;" title="แดง"></button>
+        <button class="color-btn" data-color="#00d4ff" style="background:#00d4ff;" title="ฟ้า"></button>
+        <button class="color-btn" data-color="#00ff88" style="background:#00ff88;" title="เขียว"></button>
+        <button class="color-btn" data-color="#ffdd00" style="background:#ffdd00;" title="เหลือง"></button>
+        <button class="color-btn" data-color="#ff6600" style="background:#ff6600;" title="ส้ม"></button>
+        <button class="color-btn" data-color="#cc44ff" style="background:#cc44ff;" title="ม่วง"></button>
+        <button class="color-btn" data-color="#ff69b4" style="background:#ff69b4;" title="ชมพู"></button>
+        <button class="color-btn" data-color="#ffffff" style="background:#ffffff;" title="ขาว"></button>
+      </div>
+      <div class="custom-color-row">
+        <label>เลือกสีเอง:</label>
+        <input type="color" id="customColor" value="#e94560">
+      </div>
+
+      <!-- HSL Sliders -->
+      <div class="hsl-section">
+        <div class="section-title">ปรับเฉดสีเอง (HSL)</div>
+        <div class="hsl-row">
+          <label>เฉดสี (Hue):</label>
+          <input type="range" id="hueSlider" min="0" max="360" value="348">
+          <span id="hueVal">348°</span>
+        </div>
+        <div class="hsl-row">
+          <label>ความสด (Sat):</label>
+          <input type="range" id="satSlider" min="0" max="100" value="80">
+          <span id="satVal">80%</span>
+        </div>
+        <div class="hsl-row">
+          <label>ความสว่าง:</label>
+          <input type="range" id="lightSlider" min="10" max="90" value="55">
+          <span id="lightVal">55%</span>
+        </div>
+        <div class="hsl-preview-swatch" id="hslSwatch" style="background: hsl(348, 80%, 55%);"></div>
+        <button class="btn-apply-hsl" id="btnApplyHSL">ใช้สีนี้</button>
+      </div>
+    </div>
+
+    <!-- Sliders -->
+    <div class="slider-control">
+      <label for="speed">ความเร็ว:</label>
+      <input type="range" id="speed" min="3" max="30" value="10">
+      <span id="speedValue">10s</span>
+    </div>
+    <div class="slider-control">
+      <label for="fontSize">ขนาดตัวอักษร:</label>
+      <input type="range" id="fontSize" min="5" max="40" value="15">
+      <span id="fontSizeValue">15vw</span>
+    </div>
+
+    <!-- Start buttons -->
+    <div class="controls">
+      <button class="btn-fullscreen" id="btnFullscreen">เต็มจอ & วิ่ง</button>
+      <button class="btn-static" id="btnFullscreenStatic">เต็มจอ (นิ่ง)</button>
+    </div>
+  </div>
+
+  <div class="scroll-display" id="scrollDisplay">
+    <div class="scroll-text" id="scrollText"></div>
+    <div class="exit-btn" id="exitBtn">กลับแก้ไข</div>
+    <div class="exit-hint" id="exitHint">แตะเพื่อออก</div>
+  </div>
+
+  <script>
+    const textInput = document.getElementById('textInput');
+    const btnFullscreen = document.getElementById('btnFullscreen');
+    const btnFullscreenStatic = document.getElementById('btnFullscreenStatic');
+    const scrollDisplay = document.getElementById('scrollDisplay');
+    const scrollText = document.getElementById('scrollText');
+    const speedSlider = document.getElementById('speed');
+    const speedValue = document.getElementById('speedValue');
+    const fontSizeSlider = document.getElementById('fontSize');
+    const fontSizeValue = document.getElementById('fontSizeValue');
+    const exitHint = document.getElementById('exitHint');
+    const exitBtn = document.getElementById('exitBtn');
+    const previewText = document.getElementById('previewText');
+    const previewPlaceholder = document.getElementById('previewPlaceholder');
+    const colorPresets = document.getElementById('colorPresets');
+    const customColor = document.getElementById('customColor');
+    const hueSlider = document.getElementById('hueSlider');
+    const satSlider = document.getElementById('satSlider');
+    const lightSlider = document.getElementById('lightSlider');
+    const hueVal = document.getElementById('hueVal');
+    const satVal = document.getElementById('satVal');
+    const lightVal = document.getElementById('lightVal');
+    const hslSwatch = document.getElementById('hslSwatch');
+    const btnApplyHSL = document.getElementById('btnApplyHSL');
+
+    let currentColor = '#e94560';
+
+    // Update preview on text input
+    textInput.addEventListener('input', updatePreview);
+
+    function updatePreview() {
+      const text = textInput.value.trim();
+      if (text) {
+        previewText.textContent = text;
+        previewText.style.display = 'block';
+        previewPlaceholder.style.display = 'none';
+      } else {
+        previewText.style.display = 'none';
+        previewPlaceholder.style.display = 'block';
+      }
+    }
+
+    // Color presets
+    colorPresets.addEventListener('click', (e) => {
+      const btn = e.target.closest('.color-btn');
+      if (!btn) return;
+      document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentColor = btn.dataset.color;
+      customColor.value = currentColor;
+      applyColor();
+    });
+
+    // Custom color picker
+    customColor.addEventListener('input', () => {
+      currentColor = customColor.value;
+      document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+      applyColor();
+    });
+
+    function applyColor() {
+      previewText.style.color = currentColor;
+      previewText.style.textShadow = `0 0 10px ${currentColor}`;
+      scrollText.style.color = currentColor;
+      scrollText.style.textShadow = `0 0 20px ${currentColor}, 0 0 40px ${currentColor}80`;
+    }
+
+    // HSL sliders
+    function updateHSLSwatch() {
+      const h = hueSlider.value;
+      const s = satSlider.value;
+      const l = lightSlider.value;
+      hueVal.textContent = h + '°';
+      satVal.textContent = s + '%';
+      lightVal.textContent = l + '%';
+      hslSwatch.style.background = `hsl(${h}, ${s}%, ${l}%)`;
+      satSlider.style.background = `linear-gradient(to right, hsl(${h},0%,${l}%), hsl(${h},100%,${l}%))`;
+      lightSlider.style.background = `linear-gradient(to right, hsl(${h},${s}%,10%), hsl(${h},${s}%,50%), hsl(${h},${s}%,90%))`;
+    }
+
+    hueSlider.addEventListener('input', updateHSLSwatch);
+    satSlider.addEventListener('input', updateHSLSwatch);
+    lightSlider.addEventListener('input', updateHSLSwatch);
+
+    btnApplyHSL.addEventListener('click', () => {
+      const h = hueSlider.value;
+      const s = satSlider.value;
+      const l = lightSlider.value;
+      currentColor = hslToHex(h, s, l);
+      customColor.value = currentColor;
+      document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+      applyColor();
+    });
+
+    function hslToHex(h, s, l) {
+      s /= 100;
+      l /= 100;
+      const a = s * Math.min(l, 1 - l);
+      const f = n => {
+        const k = (n + h / 30) % 12;
+        const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+        return Math.round(255 * color).toString(16).padStart(2, '0');
+      };
+      return `#${f(0)}${f(8)}${f(4)}`;
+    }
+
+    // Update speed display
+    speedSlider.addEventListener('input', () => {
+      speedValue.textContent = speedSlider.value + 's';
+      scrollText.style.animationDuration = speedSlider.value + 's';
+      previewText.style.animationDuration = (speedSlider.value / 2) + 's';
+    });
+
+    // Update font size display
+    fontSizeSlider.addEventListener('input', () => {
+      fontSizeValue.textContent = fontSizeSlider.value + 'vw';
+      scrollText.style.fontSize = fontSizeSlider.value + 'vw';
+      previewText.style.fontSize = Math.max(1, fontSizeSlider.value / 5) + 'rem';
+    });
+
+    // Start fullscreen
+    btnFullscreen.addEventListener('click', () => startFullscreen(false));
+    btnFullscreenStatic.addEventListener('click', () => startFullscreen(true));
+    textInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') startFullscreen(false);
+    });
+
+    function startFullscreen(isStatic) {
+      const text = textInput.value.trim();
+      if (!text) {
+        textInput.focus();
+        textInput.style.borderColor = '#ff0000';
+        setTimeout(() => textInput.style.borderColor = '#e94560', 1000);
+        return;
+      }
+
+      scrollText.textContent = text;
+      scrollText.style.fontSize = fontSizeSlider.value + 'vw';
+      scrollText.style.color = currentColor;
+      scrollText.style.textShadow = `0 0 20px ${currentColor}, 0 0 40px ${currentColor}80`;
+
+      if (isStatic) {
+        scrollText.classList.add('static');
+      } else {
+        scrollText.classList.remove('static');
+        scrollText.style.animationDuration = speedSlider.value + 's';
+      }
+
+      scrollDisplay.classList.add('active');
+
+      // Request fullscreen (iPad Safari uses webkitRequestFullscreen)
+      const elem = document.documentElement;
+      if (elem.requestFullscreen) {
+        elem.requestFullscreen();
+      } else if (elem.webkitRequestFullscreen) {
+        elem.webkitRequestFullscreen();
+      }
+
+      // Hide hint after 3 seconds, show exit button
+      exitHint.style.opacity = '1';
+      exitBtn.classList.remove('visible');
+      setTimeout(() => {
+        exitHint.style.opacity = '0';
+        exitBtn.classList.add('visible');
+      }, 3000);
+    }
+
+    // Stop scrolling
+    function stopScrolling() {
+      scrollDisplay.classList.remove('active');
+      scrollText.classList.remove('static');
+      exitBtn.classList.remove('visible');
+      if (document.fullscreenElement || document.webkitFullscreenElement) {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        }
+      }
+    }
+
+    // Exit button
+    exitBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      stopScrolling();
+    });
+    exitBtn.addEventListener('touchend', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      stopScrolling();
+    });
+
+    // Touch/click to exit
+    scrollDisplay.addEventListener('click', stopScrolling);
+    scrollDisplay.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      stopScrolling();
+    });
+
+    // ESC to exit
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') stopScrolling();
+    });
+
+    // Handle fullscreen change
+    document.addEventListener('fullscreenchange', () => {
+      if (!document.fullscreenElement) scrollDisplay.classList.remove('active');
+    });
+    document.addEventListener('webkitfullscreenchange', () => {
+      if (!document.webkitFullscreenElement) scrollDisplay.classList.remove('active');
+    });
+  </script>
+</body>
+</html>
